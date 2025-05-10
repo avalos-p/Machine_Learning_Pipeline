@@ -1,0 +1,20 @@
+version: 1
+disable_existing_loggers: false # Importante para mantener el logeo de Scrapy
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+handlers:
+  stdout:
+    class: logging.StreamHandler
+    formatter: simple
+    stream: ext://sys.stdout
+  file_handler:
+    class: logging.handlers.RotatingFileHandler
+    formatter: simple
+    filename: 'logs/ML_Pipeline.log'  
+    maxBytes: 5242880  # 5 MB
+    backupCount: 3  # Mantener 3 archivos de log en backup
+loggers:
+  root:
+    level: DEBUG
+    handlers: [stdout, file_handler]
