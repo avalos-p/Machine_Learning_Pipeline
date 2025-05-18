@@ -12,7 +12,7 @@ dotenv_path = Path('config/credentials/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 class SQLConnection:
-    def __init__(self, logger=None):
+    def __init__(self,host,port,database,user,password, logger=None):
         
         self.logger = logger if logger else logging.getLogger(__name__)
 
@@ -20,11 +20,11 @@ class SQLConnection:
         self.max_retries = 3
         self.retry_delay = 5 
 
-        self.db_host = os.getenv('HOST')
-        self.db_port = os.getenv('PORT')
-        self.db_database = os.getenv('DATABASE')
-        self.db_user = os.getenv('USER')
-        self.db_pass = os.getenv('PASS')
+        self.db_host = host
+        self.db_port = port
+        self.db_database = database
+        self.db_user = user
+        self.db_pass = password
 
         self.db_url = self._build_db_url()
 
@@ -84,10 +84,15 @@ class SQLConnection:
         This method executes a query and returns the results as a pandas DataFrame.
         """
         try:
-            # Execute the query and return the results as a pandas DataFrame.
             self.logger.info(f"Executing query")
-            df = pd.read_sql(query, self.engine)
-            return df
+            # Usar el método execute de SQLAlchemy y convertir los resultados a DataFrame
+            from sqlalchemy import text
+            with self.engine.connect() as connection:
+                result = connection.execute(text(query))
+                df = pd.DataFrame(result.fetchall())
+                if result.keys():  # Si hay nombres de columnas disponibles
+                    df.columns = result.keys()
+                return df
         except Exception as e:
             self.logger.error(f"Error executing query: {e}")
         return None
