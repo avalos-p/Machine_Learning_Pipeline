@@ -35,7 +35,7 @@ def scale_numerical_columns(df, save_path=None, scaler_path=None, logger=None):
                 logger.info(f"Scaler loaded successfully from {scaler_path}")
         except Exception as e:
             logger.error(f"Error loading scaler: {str(e)}")
-            return None, None
+            return None
     
     # Select numerical columns (float and int types)
     numerical_columns = scaled_df.select_dtypes(include=['float64', 'float32', 'int64', 'int32']).columns
@@ -50,7 +50,7 @@ def scale_numerical_columns(df, save_path=None, scaler_path=None, logger=None):
         logger.info(f"Successfully scaled {len(numerical_columns)} numerical columns")
     except Exception as e:
         logger.error(f"Error during scaling: {str(e)}")
-        return scaled_df, scaler
+        return scaled_df
     
     # Save the scaler if path is provided
     if save_path:
@@ -64,7 +64,7 @@ def scale_numerical_columns(df, save_path=None, scaler_path=None, logger=None):
         except Exception as e:
             logger.error(f"Error saving scaler: {str(e)}")
     
-    return scaled_df, scaler
+    return scaled_df
 
 
 def transform_with_scaler(df, scaler_path, logger=None):
