@@ -1,11 +1,14 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
+import os
 import logging
 import pandas as pd
-import os
-from dotenv import load_dotenv
+
+from datetime import datetime, timedelta
+
+from airflow import DAG
 from airflow.models import Variable
+from airflow.operators.python import PythonOperator
+
+from dotenv import load_dotenv
 from src.db_helpers import SQLConnection
 from src.cleaner import df_cleaner, split_data
 from src.encoder import encode_categorical_columns
@@ -54,7 +57,7 @@ def extract_data_from_db(**kwargs):
         df = db_connection.execute_query_to_pd(query)
         logger.info("Consulta SQL ejecutada y datos extraídos")
 
-        output_path = os.path.join(dag_folder, 'data', 'raw_data', 'testquery.csv')
+        output_path = os.path.join(dag_folder, 'data', 'raw_data', 'fraud_database.csv')
 
         df.to_csv(output_path, index=False)
         
@@ -74,7 +77,7 @@ with DAG(
     default_args=default_args,
     description='ETL pipeline para extracción y procesamiento de datos',
     schedule=None,  # Ejecutar manualmente
-    start_date=datetime(2023, 1, 1),
+    start_date=datetime(2025, 1, 1),
     catchup=False,
     tags=['etl', 'data_pipeline'],
 ) as dag:
@@ -83,7 +86,50 @@ with DAG(
     extract_task = PythonOperator(
         task_id='extract_data',
         python_callable=extract_data_from_db
-    )    
+    )
+
+def clean_data_from_db(**kwargs):
+    logger.info("Extracting data from csv file")
+
+    dag_folder = os.path.dirname(__file__)
+    csv_path = os.path.join(dag_folder, 'data', 'raw_data', 'fraud_database.csv')
+    db = pd.read_csv(csv_path)
+    db = df_cleaner(db,logger)
+
+    encoder_path = os.path.join(dag_folder, 'models', 'transformers', 'encoders','ordinal_encoder.pkl')
+    db = encode_categorical_columns(db, encoder_path, None, logger)
+
+    clean_data_path = os.path.join(dag_folder, 'data', 'cleaned_data', 'fraud_database_cleaned.csv')
+    db.to_csv(clean_data_path, index=False)
+    logger.info(f"Cleaned data saved to {clean_data_path}")
+
+
+def train_model(**kwargs):
+
+    dag_folder = os.path.dirname(__file__)
+    clean_data_path = os.path.join(dag_folder, 'data', 'cleaned_data', 'fraud_database_cleaned.csv')
+
+    db = pd.read_csv(clean_data_path)
+    X, Y = split_data(db,"is_fraud",logger)
+
+    scaler_path = os.path.join(dag_folder, 'models', 'transformers', 'scalers','robust_scaler.pkl')
+    X = scale_numerical_columns(X,scaler_path,None, logger)
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # Definir el orden de las tareas
     extract_task 
 
