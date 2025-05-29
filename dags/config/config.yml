@@ -1,7 +1,0 @@
-path:
-  raw_data: "data/raw_data/"
-  models: "models/trained"
-  transformers: "models/transformers"
-  cleaner: "models/transformers/cleaners"
-  scaler: "models/transformers/scalers"
-  encoder: "models/transformers/encoders"

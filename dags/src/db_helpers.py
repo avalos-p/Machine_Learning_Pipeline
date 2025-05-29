@@ -48,7 +48,7 @@ class SQLConnection:
                 self.logger.info("Connected to the database successfully.")
                 return self.engine
             except OperationalError as e:
-                self.logger.error(f"Conection error: {e}, retrying")
+                self.logger.error(f"Connection error: {e}, retrying")
                 attempts += 1
                 time.sleep(self.retry_delay)
         self.logger.critical("Could not connect to the database.")
@@ -85,12 +85,12 @@ class SQLConnection:
         """
         try:
             self.logger.info(f"Executing query")
-            # Usar el método execute de SQLAlchemy y convertir los resultados a DataFrame
+            # Use the SQLAlchemy execute method and convert the results to a DataFrame
             from sqlalchemy import text
             with self.engine.connect() as connection:
                 result = connection.execute(text(query))
                 df = pd.DataFrame(result.fetchall())
-                if result.keys():  # Si hay nombres de columnas disponibles
+                if result.keys():  # If column names are available
                     df.columns = result.keys()
                 return df
         except Exception as e:

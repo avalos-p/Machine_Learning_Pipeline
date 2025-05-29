@@ -6,8 +6,8 @@ import logging
 
 def encode_categorical_columns(df, save_path=None, encoder_path=None, logger=None):
     """
-    Codify categorical columns of a DataFrame and optionally save the encoder
-    or load it from a file and codify the DataFrame.
+    Encodes categorical columns of a DataFrame and optionally saves the encoder
+    or loads it from a file and encodes the DataFrame.
     
     Parameters:
     df (pd.DataFrame): DataFrame to encode.
@@ -32,7 +32,7 @@ def encode_categorical_columns(df, save_path=None, encoder_path=None, logger=Non
             logger.error(f"Error loading encoder: {str(e)}")
             return None
     
-    # Selecciona las columnas categóricas
+    # Select categorical columns
     categorical_columns = encoded_df.select_dtypes(include=['object']).columns
     
     if len(categorical_columns) == 0:
