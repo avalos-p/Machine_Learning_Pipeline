@@ -1,5 +1,5 @@
 version: 1
-disable_existing_loggers: false # Importante para mantener el logeo de airflow
+disable_existing_loggers: false # Important to maintain Airflow logging
 formatters:
   simple:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -13,7 +13,7 @@ handlers:
     formatter: simple
     filename: 'logs/ML_Pipeline.log'  
     maxBytes: 5242880  # 5 MB
-    backupCount: 3  # Mantener 3 archivos de log en backup
+    backupCount: 3  # Keep 3 backup log files
 loggers:
   root:
     level: DEBUG

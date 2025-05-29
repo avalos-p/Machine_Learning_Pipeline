@@ -1,0 +1,17 @@
+{
+    "test_size": 0.2,
+    "random_state": 42,
+    "cv_splits": 3,
+    "model_type": "DecisionTree",
+    "param_grid_DecisionTree": {
+        "classifier__max_depth": [3, 5, 7],
+        "classifier__min_samples_split": [10, 20, 30],
+        "classifier__min_samples_leaf": [5, 10, 15]
+    },
+    "fixed_hyperparameters_DecisionTree": {
+        "classifier__criterion": "gini"
+    },
+    "output_model_path": "models/advanced_model/advanced_fraud_model.pkl",
+    "output_metrics_path": "models/advanced_model/advanced_fraud_metrics.json",
+    "output_plots_dir": "models/advanced_model/plots_advanced"
+} 
