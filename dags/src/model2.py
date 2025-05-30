@@ -111,7 +111,7 @@ class AdvancedModelTrainer:
             pipeline_steps = []
 
             # Base classifier (DecisionTree for now, could be made configurable)
-            # Fixed hyperparameters are set here
+            # Hyperparameters are set here
             fixed_hyperparams_key = f"fixed_hyperparameters_{self.config.get('model_type', 'default')}"
             fixed_hyperparams = self.config.get(fixed_hyperparams_key, {})
             # Remove 'classifier__' prefix if it exists in the config
@@ -120,10 +120,9 @@ class AdvancedModelTrainer:
             classifier = DecisionTreeClassifier(random_state=self.config.get('random_state', 42), **fixed_hyperparams_clean)
             pipeline_steps.append(('classifier', classifier))
 
-            current_pipeline = SklearnPipeline(steps=pipeline_steps) # Using SklearnPipeline directly
+            current_pipeline = SklearnPipeline(steps=pipeline_steps) 
 
             # Define the parameter grid for GridSearchCV
-            # Parameter names must match pipeline steps, e.g., 'classifier__max_depth'
             param_grid_key = f"param_grid_{self.config.get('model_type', 'default')}"
             param_grid = self.config.get(param_grid_key, {})
 
@@ -139,11 +138,11 @@ class AdvancedModelTrainer:
                     param_grid,
                     scoring='average_precision', # Optimize for PR AUC
                     cv=self.config.get('cv_splits', 5),
-                    n_jobs=-1, # Use all available processors
-                    verbose=1 # To see progress
+                    n_jobs=-1,
+                    verbose=1 
                 )
                 search.fit(X_train, y_train)
-                self.model = search.best_estimator_ # The best pipeline
+                self.model = search.best_estimator_ 
                 self.logger.info(f"Best parameters found by GridSearchCV: {search.best_params_}")
                 self.logger.info(f"Best PR AUC (average_precision) in CV: {search.best_score_:.4f}")
 
@@ -173,7 +172,7 @@ class AdvancedModelTrainer:
             'recall_weighted': precision_recall_fscore_support(y_test, y_pred, average='weighted')[1],
             'f1_score_weighted': precision_recall_fscore_support(y_test, y_pred, average='weighted')[2],
             'roc_auc': roc_auc_score(y_test, y_pred_proba),
-            'pr_auc': average_precision_score(y_test, y_pred_proba), # This is the important one
+            'pr_auc': average_precision_score(y_test, y_pred_proba), 
             'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
         }
 
@@ -214,10 +213,9 @@ class AdvancedModelTrainer:
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
-        # Convert np.float64 objects to float for JSON serialization
         serializable_metrics = {}
         for k, v in self.metrics.items():
-            if isinstance(v, np.generic): # np.float64, np.int64 etc.
+            if isinstance(v, np.generic):
                 serializable_metrics[k] = v.item()
             elif isinstance(v, list) and all(isinstance(i, list) for i in v): # For confusion matrix
                  serializable_metrics[k] = [[int(elem) for elem in row] for row in v]
@@ -243,7 +241,6 @@ class AdvancedModelTrainer:
 
         os.makedirs(plots_dir, exist_ok=True)
 
-        # The 'model' is the pipeline; we need the final estimator for 'from_estimator'.
         # If the pipeline has a 'classifier' step, we use it.
         try:
             if hasattr(self.model, 'named_steps') and 'classifier' in self.model.named_steps:
@@ -252,7 +249,7 @@ class AdvancedModelTrainer:
                  hasattr(self.model.best_estimator_, 'named_steps') and \
                  'classifier' in self.model.best_estimator_.named_steps: # If it's a GridSearchCV on a pipeline
                 classifier_for_plot = self.model.best_estimator_.named_steps['classifier']
-            else: # If it's a simple classifier (or we can't find the 'classifier' step)
+            else: 
                 classifier_for_plot = self.model
                 self.logger.warning("Could not find 'classifier' step in the pipeline for plotting, using the full pipeline/model. This might fail if the pipeline is not a simple estimator.")
 
@@ -337,7 +334,6 @@ if __name__ == '__main__':
         "random_state": 42,
         "cv_splits": 2, # Faster for testing
         "model_type": "DecisionTree",
-        # SMOTE related keys removed
         "param_grid_DecisionTree": {
             "classifier__max_depth": [3, 5],
             "classifier__min_samples_split": [10, 20],
@@ -370,7 +366,6 @@ if __name__ == '__main__':
 
     logger.info("--- Starting AdvancedModelTrainer test ---")
     try:
-        # SMOTE availability check removed
         trainer = AdvancedModelTrainer(config_path=mock_config_path, logger=logger)
         trainer.load_data(mock_data_path)
 
